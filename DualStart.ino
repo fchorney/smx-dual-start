@@ -2,39 +2,47 @@
 #include <Keyboard.h>
 #include "MyKey.h"
 
+// Arduino Pins
 const int buttonPin = D7;
 const int boardSelect = D10;
 
-const int leftKey = 176; // Return
-const int rightKey = 176; // Return
+// Key Codes
+const int leftKeyCode = 176; // Return
+const int rightKeyCode = 176; // Return
 int key_code = -1;
 
-const unsigned long key_debounce_ms = 20;
+// Amount in milliseconds to debounce the press and release of the button
+const unsigned long keyDebounce = 20;
 
-const unsigned long left_delay_ms = 0;
-const unsigned long right_delay_ms = 500;
+// Set delay for both "keyboards" in Milliseconds
+const unsigned long leftDelay = 0;
+const unsigned long rightDelay = 500;
 
-bool will_press = false;
-unsigned long delay_ms = 0;
-unsigned long delay_timer = 0;
+// Variables to handle delayed button press
+bool willPress = false;
+unsigned long delay = 0;
+unsigned long delayTimer = 0;
 
+// Determine if we are on the left or right board
 int isRightBoard = false;
 
+// The Key/Button we are using
 Key key = Key(buttonPin);
 
 void setup() {
-  key.setPressTime(key_debounce_ms);
-  key.setReleaseTime(key_debounce_ms);
+  key.setPressTime(keyDebounce);
+  key.setReleaseTime(keyDebounce);
 
-  // If boardSelect is HIGH, we are on the Right Board
+  // If boardSelect pin is HIGH, we are on the Right Board
   isRightBoard = digitalRead(boardSelect) == HIGH;
 
+  // Set variables depending on which "Keyboard" we are on
   if (isRightBoard) {
-    key_code = rightKey;
-    delay_ms = right_delay_ms;
+    key_code = rightKeyCode;
+    delay = rightDelay;
   } else {
-    key_code = leftKey;
-    delay_ms = left_delay_ms;
+    key_code = leftKeyCode;
+    delay = leftDelay;
   }
 
   // Reset Keyboard Takeover
@@ -43,22 +51,24 @@ void setup() {
 }
 
 void loop() {
+  // Update the status of the key
   key.update();
 
   switch (key.kstate) {
     case PRESSED:
-      will_press = true;
-      delay_timer = millis();
+      // When we detect a press, start the delay timer
+      willPress = true;
+      delayTimer = millis();
       break;
   }
 
   // Handle Delayed Press
-  if (will_press) {
-    if ((millis() - delay_timer) > delay_ms) {
+  if (willPress) {
+    if ((millis() - delayTimer) > delay) {
       Keyboard.begin();
       Keyboard.write(key_code);
       Keyboard.end();
-      will_press = false;
+      willPress = false;
     }
   }
 }

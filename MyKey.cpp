@@ -1,67 +1,60 @@
 #include "MyKey.h"
 
+// Default Constructor
 Key::Key() {
   pin = -1;
   kstate = IDLE;
-  stateChanged = false;
 }
 
+// Constructor
 Key::Key(int btn_pin){
   pin = btn_pin;
   kstate = IDLE;
-  stateChanged = false;
 
+  // Set pin to INPUT mode
   pinMode(pin, INPUT);
 }
 
 void Key::update() {
-  nextKeyState(digitalRead(pin));
-}
+  btn = (digitalRead(pin));
+  state = kstate;
 
-void Key::nextKeyState(bool btn) {
-  stateChanged = false;
-
-  switch (kstate) {
+  switch (state) {
     case IDLE:
       if (btn == CLOSED) {
-        transitionTo(PRESS);
+        kstate = PRESS;
         pressTimer = millis();
       }
       break;
     case PRESS:
       if ((millis() - pressTimer) > pressTime) {
-        transitionTo(PRESSED);
+        kstate = PRESSED;
       } else if (btn == OPEN) {
-        transitionTo(RELEASE);
+        kstate = RELEASE;
         releaseTimer = millis();
       }
       break;
     case PRESSED:
-      transitionTo(HOLD);
+      kstate = HOLD;
       break;
     case HOLD:
       if (btn == OPEN) {
-        transitionTo(RELEASE);
+        kstate = RELEASE;
         releaseTimer = millis();
       }
       break;
     case RELEASE:
       if ((millis() - releaseTimer) > releaseTime) {
-        transitionTo(RELEASED);
+        kstate = RELEASED;
       } else if (btn == CLOSED) {
-        transitionTo(PRESS);
+        kstate = PRESS;
         pressTimer = millis();
       }
       break;
     case RELEASED:
-      transitionTo(IDLE);
+      kstate = IDLE;
       break;
   }
-}
-
-void Key::transitionTo(KeyState nextState) {
-  kstate = nextState;
-  stateChanged = true;
 }
 
 void Key::setPressTime(unsigned long pTime) {

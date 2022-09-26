@@ -11,7 +11,6 @@ class Key {
   public:
     int pin;
     KeyState kstate;
-    bool stateChanged;
     unsigned long pressTimer;
     unsigned long releaseTimer;
 
@@ -25,9 +24,6 @@ class Key {
   private:
     unsigned long pressTime;
     unsigned long releaseTime;
-
-    void nextKeyState(bool btn);
-    void transitionTo(KeyState nextState);
 };
 
 #endif
