@@ -4,20 +4,22 @@
 Key::Key() {
   pin = -1;
   kstate = IDLE;
+  hasFullyReleased = true;
 }
 
 // Constructor
 Key::Key(int btn_pin){
   pin = btn_pin;
   kstate = IDLE;
+  hasFullyReleased = true;
 
   // Set pin to INPUT mode
   pinMode(pin, INPUT);
 }
 
 void Key::update() {
-  btn = (digitalRead(pin));
-  state = kstate;
+  bool btn = digitalRead(pin);
+  KeyState state = kstate;
 
   switch (state) {
     case IDLE:
@@ -28,13 +30,22 @@ void Key::update() {
       break;
     case PRESS:
       if ((millis() - pressTimer) > pressTime) {
-        kstate = PRESSED;
+        if (hasFullyReleased) {
+          kstate = PRESSED;
+        } else {
+          if (btn == CLOSED) {
+            kstate = HOLD;
+          } else {
+            kstate = RELEASE;
+          }
+        }
       } else if (btn == OPEN) {
         kstate = RELEASE;
         releaseTimer = millis();
       }
       break;
     case PRESSED:
+      hasFullyReleased = false;
       kstate = HOLD;
       break;
     case HOLD:
@@ -52,6 +63,7 @@ void Key::update() {
       }
       break;
     case RELEASED:
+      hasFullyReleased = true;
       kstate = IDLE;
       break;
   }

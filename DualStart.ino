@@ -16,12 +16,12 @@ const unsigned long keyDebounce = 20;
 
 // Set delay for both "keyboards" in Milliseconds
 const unsigned long leftDelay = 0;
-const unsigned long rightDelay = 500;
+const unsigned long rightDelay = 100;
 
 // Variables to handle delayed button press
 bool willPress = false;
-unsigned long delay = 0;
-unsigned long delayTimer = 0;
+unsigned long keyDelay = 0;
+unsigned long keyDelayTimer = 0;
 
 // Determine if we are on the left or right board
 int isRightBoard = false;
@@ -39,10 +39,10 @@ void setup() {
   // Set variables depending on which "Keyboard" we are on
   if (isRightBoard) {
     key_code = rightKeyCode;
-    delay = rightDelay;
+    keyDelay = rightDelay;
   } else {
     key_code = leftKeyCode;
-    delay = leftDelay;
+    keyDelay = leftDelay;
   }
 
   // Reset Keyboard Takeover
@@ -58,13 +58,13 @@ void loop() {
     case PRESSED:
       // When we detect a press, start the delay timer
       willPress = true;
-      delayTimer = millis();
+      keyDelayTimer = millis();
       break;
   }
 
   // Handle Delayed Press
   if (willPress) {
-    if ((millis() - delayTimer) > delay) {
+    if ((millis() - keyDelayTimer) > keyDelay) {
       Keyboard.begin();
       Keyboard.write(key_code);
       Keyboard.end();

@@ -11,6 +11,7 @@ class Key {
   public:
     int pin;
     KeyState kstate;
+    bool hasFullyReleased;
     unsigned long pressTimer;
     unsigned long releaseTimer;
 
